@@ -31,10 +31,6 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/gambol99/go-oidc"
-
-[[constraint]]
-  branch = "master"
   name = "golang.org/x/oauth2"
 
 [prune]

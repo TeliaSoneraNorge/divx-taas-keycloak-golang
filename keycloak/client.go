@@ -9,7 +9,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gambol99/go-oidc/oauth2"
+	"golang.org/x/oauth2"
 )
 
 func NewKcClient(oauthConfig *oauth2.Config, server string, user string, password string) *KcClient {

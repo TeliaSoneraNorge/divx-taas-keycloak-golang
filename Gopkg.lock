@@ -8,15 +8,6 @@
   version = "v3.2.0"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/gambol99/go-oidc"
-  packages = [
-    "http",
-    "oauth2"
-  ]
-  revision = "87948fe50989333a6a3f970e48f8dec844361fa1"
-
-[[projects]]
   name = "github.com/golang/protobuf"
   packages = ["proto"]
   revision = "925541529c1fa6821df4e44ce2723319eb2be768"
@@ -57,6 +48,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5c19256acc74fef8a68fbcc5ef47426f9628c1e8fae9378a26dea3b950bcf9f5"
+  inputs-digest = "2f649f41f6c842cded5d23c4f67030048cbb4fc8dac86c0890646ceec3578860"
   solver-name = "gps-cdcl"
   solver-version = 1
