@@ -57,6 +57,7 @@ func (kc *KcClient) GetUserRolesForClient(realm string, user PairWise, clientID 
 }
 
 func (kc *KcClient) GetMasterRealmUserRoles(userId string) ([]RoleRepresentation, error) {
+
 	url := fmt.Sprintf("%s/admin/realms/master/users/%s/role-mappings/realm/composite",
 		kc.server,
 		userId,
@@ -82,7 +83,7 @@ func (kc *KcClient) GetMasterRealmUserRoles(userId string) ([]RoleRepresentation
 		return roles, nil
 	}
 
-	err := errors.New("Role name not found for this client.")
+	err = errors.New("Role name not found for this client.")
 	return nil, err
 }
 

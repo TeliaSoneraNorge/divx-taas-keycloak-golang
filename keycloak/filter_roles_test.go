@@ -69,14 +69,16 @@ func TestFilterRoleByName(t *testing.T) {
 	roleMappings := keycloak.RoleMappings{}
 	json.Unmarshal([]byte(str), &roleMappings)
 
-	a := FilterClientIDByRoleName(roleMappings, "client_admin")
+	a := keycloak.FilterClientIDByRoleName(roleMappings, "client_admin")
+
 	if len(a) != 2 {
 		t.Errorf("fail length")
 	}
-	if a[0] != "9b17ee9d920b43f4" {
-		t.Errorf("fail length")
+
+	if a[0] != "efe5f41680da475f" {
+		t.Errorf("fail index 0")
 	}
-	if a[1] != "efe5f41680da475f" {
-		t.Errorf("fail length")
+	if a[1] != "9b17ee9d920b43f4" {
+		t.Errorf("fail index 1")
 	}
 }
