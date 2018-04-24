@@ -44,3 +44,16 @@ type KcClient struct {
 	token          *oauth2.Token
 	UserWithAccess string
 }
+
+type RoleMappings struct {
+	RealmMappings  []RoleRepresentation `json:"realmMappings"`
+	ClientMappings RoleMappingClient    `json:"clientMappings"`
+}
+
+type RoleMappingClient map[string]RoleMap
+
+type RoleMap struct {
+	Id       string               `json:"id"`
+	Client   string               `json:"client"`
+	Mappings []RoleRepresentation `json:"mappings"`
+}

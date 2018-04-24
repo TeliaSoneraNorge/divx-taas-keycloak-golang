@@ -204,3 +204,30 @@ func (kc *KcClient) GetClientRoles(realm string, clientID string) ([]RoleReprese
 	err := errors.New("Failed to get roles for this clientID.")
 	return nil, err
 }
+
+func (kc *KcClient) GetUserRoleMappings(realm string, userID string) (*RoleMappings, error) {
+	url := fmt.Sprintf("%s/admin/realms/%s/users/%s/role-mappings",
+		kc.server,
+		realm,
+		userID,
+	)
+
+	httpClient := kc.oauthConfig.Client(context.Background(), kc.token)
+	req, _ := http.NewRequest("GET", url, nil)
+	resp, _ := httpClient.Do(req)
+
+	if resp.StatusCode == http.StatusOK {
+		defer resp.Body.Close()
+
+		roleMappings := RoleMappings{}
+
+		// Use json.Decode for reading streams of JSON data
+		if err := json.NewDecoder(resp.Body).Decode(&roleMappings); err != nil {
+			log.Println(err)
+		}
+		return &roleMappings, nil
+	}
+
+	err := errors.New("Failed to get roleMappings for this clientID.")
+	return nil, err
+}
