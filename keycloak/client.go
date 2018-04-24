@@ -231,3 +231,31 @@ func (kc *KcClient) GetUserRoleMappings(realm string, userID string) (*RoleMappi
 	err := errors.New("Failed to get roleMappings for this clientID.")
 	return nil, err
 }
+
+func (kc *KcClient) GetClientSecret(realm string, userID string, clientID string) (*ClientSecret, error) {
+	// @todo we should log this request
+	url := fmt.Sprintf("%s/admin/realms/%s/clients/%s/client-secret",
+		kc.server,
+		realm,
+		clientID,
+	)
+
+	httpClient := kc.oauthConfig.Client(context.Background(), kc.token)
+	req, _ := http.NewRequest("GET", url, nil)
+	resp, _ := httpClient.Do(req)
+
+	if resp.StatusCode == http.StatusOK {
+		defer resp.Body.Close()
+
+		clientSecret := ClientSecret{}
+
+		// Use json.Decode for reading streams of JSON data
+		if err := json.NewDecoder(resp.Body).Decode(&clientSecret); err != nil {
+			log.Println(err)
+		}
+		return &clientSecret, nil
+	}
+
+	err := errors.New("Failed to get clientSecret for this clientID.")
+	return nil, err
+}

@@ -57,3 +57,8 @@ type RoleMap struct {
 	Client   string               `json:"client"`
 	Mappings []RoleRepresentation `json:"mappings"`
 }
+
+type ClientSecret struct {
+	Type  string `json:"type"`
+	Value string `json:"value"`
+}
