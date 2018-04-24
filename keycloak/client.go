@@ -64,7 +64,11 @@ func (kc *KcClient) GetMasterRealmUserRoles(userId string) ([]RoleRepresentation
 
 	httpClient := kc.oauthConfig.Client(context.Background(), kc.token)
 	req, _ := http.NewRequest("GET", url, nil)
-	resp, _ := httpClient.Do(req)
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
 
 	if resp.StatusCode == http.StatusOK {
 		defer resp.Body.Close()
