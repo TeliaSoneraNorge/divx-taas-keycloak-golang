@@ -23,7 +23,9 @@ func NewKcClient(oauthConfig *oauth2.Config, server string, user string, passwor
 		log.Println("Something went wrong creating a new client.")
 		log.Fatalln(err.Error())
 	}
-	client.token = token
+
+	sourceToken := oauthConfig.TokenSource(context.Background(), token)
+	client.sourceToken = oauth2.ReuseTokenSource(nil, sourceToken)
 	return client
 }
 
@@ -36,7 +38,7 @@ func (kc *KcClient) GetUserRolesForClient(realm string, user PairWise, clientID 
 		clientID,
 	)
 
-	httpClient := kc.oauthConfig.Client(context.Background(), kc.token)
+	httpClient := kc.GetHttpClient()
 	req, _ := http.NewRequest("GET", url, nil)
 	resp, _ := httpClient.Do(req)
 
@@ -63,7 +65,7 @@ func (kc *KcClient) GetMasterRealmUserRoles(userId string) ([]RoleRepresentation
 		userId,
 	)
 
-	httpClient := kc.oauthConfig.Client(context.Background(), kc.token)
+	httpClient := kc.GetHttpClient()
 	req, _ := http.NewRequest("GET", url, nil)
 	resp, err := httpClient.Do(req)
 	if err != nil {
@@ -109,7 +111,7 @@ func (kc *KcClient) GetClientByRoleName(taasRealm string, clientId string, roleN
 		roleName,
 	)
 
-	httpClient := kc.oauthConfig.Client(context.Background(), kc.token)
+	httpClient := kc.GetHttpClient()
 	req, _ := http.NewRequest("GET", url, nil)
 	resp, _ := httpClient.Do(req)
 
@@ -138,7 +140,7 @@ func (kc *KcClient) LinkUserToClientRole(realm string, user PairWise, clientID s
 		clientID,
 	)
 
-	httpClient := kc.oauthConfig.Client(context.Background(), kc.token)
+	httpClient := kc.GetHttpClient()
 	roles := []*RoleRepresentation{role}
 
 	b, err := json.Marshal(roles)
@@ -190,7 +192,7 @@ func (kc *KcClient) GetClientRoles(realm string, clientID string) ([]RoleReprese
 		clientID,
 	)
 
-	httpClient := kc.oauthConfig.Client(context.Background(), kc.token)
+	httpClient := kc.GetHttpClient()
 	req, _ := http.NewRequest("GET", url, nil)
 	resp, _ := httpClient.Do(req)
 
@@ -217,7 +219,7 @@ func (kc *KcClient) GetUserRoleMappings(realm string, userID string) (*RoleMappi
 		userID,
 	)
 
-	httpClient := kc.oauthConfig.Client(context.Background(), kc.token)
+	httpClient := kc.GetHttpClient()
 	req, _ := http.NewRequest("GET", url, nil)
 	resp, _ := httpClient.Do(req)
 
@@ -245,7 +247,7 @@ func (kc *KcClient) GetClientSecret(realm string, userID string, clientID string
 		clientID,
 	)
 
-	httpClient := kc.oauthConfig.Client(context.Background(), kc.token)
+	httpClient := kc.GetHttpClient()
 	req, _ := http.NewRequest("GET", url, nil)
 	resp, _ := httpClient.Do(req)
 
@@ -263,4 +265,18 @@ func (kc *KcClient) GetClientSecret(realm string, userID string, clientID string
 
 	err := errors.New("Failed to get clientSecret for this clientID.")
 	return nil, err
+}
+
+func (kc *KcClient) GetHttpClient() *http.Client {
+	httpClient := kc.oauthConfig.Client(context.Background(), kc.GetToken())
+	return httpClient
+}
+
+func (kc *KcClient) GetToken() *oauth2.Token {
+	token, err := kc.sourceToken.Token()
+	if err != nil {
+		log.Println("Failed to get the token. Maybe refresh failed.")
+		log.Fatalln("Sad times " + err.Error())
+	}
+	return token
 }
