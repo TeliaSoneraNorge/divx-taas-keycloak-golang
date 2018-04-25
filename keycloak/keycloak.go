@@ -1,9 +1,17 @@
 package keycloak
 
 import (
+	oidc "github.com/coreos/go-oidc"
 	jwt "github.com/dgrijalva/jwt-go"
 	"golang.org/x/oauth2"
 )
+
+type KeycloakOidcClient struct {
+	KeycloakClient *KcClient
+	Provider       *oidc.Provider
+	Verifier       *oidc.IDTokenVerifier
+	Server         string
+}
 
 type ErrorMessageResponseFromKeycloak struct {
 	ErrorMessage string `json:"errorMessage"`

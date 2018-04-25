@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -282,9 +281,6 @@ func (kc *KcClient) PostClientRoles(realm string, clientID string, role RoleRepr
 			role.Name,
 			clientID,
 		)
-		bodyBytes, _ := ioutil.ReadAll(resp.Body)
-		bodyString := string(bodyBytes)
-		fmt.Println(bodyString)
 
 		if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 			log.Println(err)
@@ -375,4 +371,92 @@ func (kc *KcClient) GetToken() *oauth2.Token {
 		log.Fatalln("Sad times " + err.Error())
 	}
 	return token
+}
+
+func (kc *KcClient) DeleteRealmRole(realm string, roleName string) (bool, ErrorMessageResponseFromKeycloak) {
+	var errorMessage ErrorMessageResponseFromKeycloak
+	var response bool
+	url := fmt.Sprintf("%s/admin/realms/%s/roles/%s",
+		kc.server,
+		realm,
+		roleName,
+	)
+
+	httpClient := kc.GetHttpClient()
+	req, _ := http.NewRequest("DELETE", url, nil)
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := httpClient.Do(req)
+
+	if err != nil {
+		errorMessage.ErrorMessage = fmt.Sprintf("Failed to DELETE role with name %s from realm %s",
+			roleName,
+			realm,
+		)
+		log.Println(errorMessage.ErrorMessage)
+		log.Println(err)
+		return response, errorMessage
+	}
+
+	defer resp.Body.Close()
+	response = true
+	return response, errorMessage
+}
+
+func (kc *KcClient) PostRealmRole(realm string, role RoleRepresentation) (bool, ErrorMessageResponseFromKeycloak) {
+	var errorMessage ErrorMessageResponseFromKeycloak
+	response := false
+
+	url := fmt.Sprintf("%s/admin/realms/%s/roles",
+		kc.server,
+		realm,
+	)
+
+	b, err := json.Marshal(role)
+	if err != nil {
+		log.Println("Failed to marshall roles :(")
+		errorMessage.ErrorMessage = "Failed to convert the role into json."
+		return response, errorMessage
+	}
+
+	httpClient := kc.GetHttpClient()
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(b))
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := httpClient.Do(req)
+
+	if err != nil {
+		errorMessage.ErrorMessage = fmt.Sprintf("Failed to POST role %s to realm %s",
+			role.Name,
+			realm,
+		)
+		log.Println(errorMessage.ErrorMessage)
+		log.Println(err)
+		return response, errorMessage
+	}
+
+	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusCreated {
+		// Get the role
+		log.Printf("Role %s added to realm %s",
+			role.Name,
+			realm,
+		)
+
+		response = true
+		return response, errorMessage
+	}
+
+	if resp.StatusCode == http.StatusConflict {
+		if err := json.NewDecoder(resp.Body).Decode(&errorMessage); err != nil {
+			log.Println(err)
+		}
+		response = false
+		return response, errorMessage
+	}
+
+	log.Printf("Role %s not added to realm %s",
+		role.Name,
+		realm,
+	)
+	errorMessage.ErrorMessage = fmt.Sprintf("Not a 204, but no error. StatusCode is %d", resp.StatusCode)
+	return response, errorMessage
 }
