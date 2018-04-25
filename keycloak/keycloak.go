@@ -5,6 +5,10 @@ import (
 	"golang.org/x/oauth2"
 )
 
+type ErrorMessageResponseFromKeycloak struct {
+	ErrorMessage string `json:"errorMessage"`
+}
+
 type VerySimpleRole struct {
 	UserId   string `json:"userId"`
 	ClientId string `json:"clientId"`
