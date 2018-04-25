@@ -212,6 +212,37 @@ func (kc *KcClient) GetClientRoles(realm string, clientID string) ([]RoleReprese
 	return nil, err
 }
 
+func (kc *KcClient) DeleteClientRoles(realm string, clientID string, roleName string) (bool, ErrorMessageResponseFromKeycloak) {
+	var errorMessage ErrorMessageResponseFromKeycloak
+	var response bool
+
+	url := fmt.Sprintf("%s/admin/realms/%s/clients/%s/roles/%s",
+		kc.server,
+		realm,
+		clientID,
+		roleName,
+	)
+
+	httpClient := kc.GetHttpClient()
+	req, _ := http.NewRequest("DELETE", url, nil)
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := httpClient.Do(req)
+
+	if err != nil {
+		errorMessage.ErrorMessage = fmt.Sprintf("Failed to DELETE role with name %s to client %s",
+			roleName,
+			clientID,
+		)
+		log.Println(errorMessage.ErrorMessage)
+		log.Println(err)
+		return response, errorMessage
+	}
+
+	defer resp.Body.Close()
+	response = true
+	return response, errorMessage
+}
+
 func (kc *KcClient) PostClientRoles(realm string, clientID string, role RoleRepresentation) (RoleRepresentation, ErrorMessageResponseFromKeycloak) {
 	var errorMessage ErrorMessageResponseFromKeycloak
 	var response RoleRepresentation

@@ -1,6 +1,11 @@
 package utils
 
-import "strings"
+import (
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strings"
+)
 
 // Is the string in a simple array
 func InArray(arr []string, str string) bool {
@@ -16,4 +21,11 @@ func InArray(arr []string, str string) bool {
 func ExtractTokenFromBearerHeader(raw string) string {
 	accessToken := strings.SplitAfter(raw, "Bearer ")[1]
 	return accessToken
+}
+
+func DumpResponseBody(resp *http.Response) {
+	fmt.Println(resp.StatusCode)
+	bodyBytes, _ := ioutil.ReadAll(resp.Body)
+	bodyString := string(bodyBytes)
+	fmt.Println(bodyString)
 }
