@@ -398,7 +398,21 @@ func (kc *KcClient) DeleteRealmRole(realm string, roleName string) (bool, ErrorM
 	}
 
 	defer resp.Body.Close()
-	response = true
+
+	if resp.StatusCode == http.StatusNoContent {
+		response = true
+		return response, errorMessage
+	}
+
+	response = false
+	if resp.StatusCode == http.StatusNotFound {
+		errorMessage.ErrorMessage = fmt.Sprintf("Role %s not found, therefore not deleted from realm %s",
+			roleName,
+			realm,
+		)
+	} else {
+		errorMessage.ErrorMessage = fmt.Sprintf("Failed to delete role. Status code %d", resp.StatusCode)
+	}
 	return response, errorMessage
 }
 
