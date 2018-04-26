@@ -362,41 +362,54 @@ func (kc *KcClient) GetHttpClient() *http.Client {
 	return httpClient
 }
 
-func (kc *KcClient) GetToken() *oauth2.Token {
-	login := true
-	var token *oauth2.Token
-	var err error
-	// This is the normal approach
-	if kc.sourceToken != nil {
-		login = false
-		token, err = kc.sourceToken.Token()
-		if err != nil {
-			log.Println("Failed to get the token. Maybe refresh failed.")
-			log.Println("Error is : " + err.Error())
-
-			errorMessage := NewTestTokenErrorResponse(err.Error())
-			if errorMessage.Error == "invalid_grant" && errorMessage.ErrorDescription != "Refresh token expired" {
-				login = true
-			} else {
-				log.Fatalln("Getting the token has failed.")
-			}
-
-		} else {
-			sourceToken := internalOauthConfig.TokenSource(context.Background(), token)
-			kc.sourceToken = oauth2.ReuseTokenSource(nil, sourceToken)
-		}
+// Return false to signify that loadTokenFromCredentials is needed.
+func loadTokenFromSourceToken(kc *KcClient) bool {
+	login := false
+	if kc.sourceToken == nil {
+		login = true
+		return login
 	}
 
-	if login {
-		// This is first time and if the token has failed on "refresh_token"
-		token, err = internalOauthConfig.PasswordCredentialsToken(context.Background(), kc.user, kc.password)
-		if err != nil {
-			log.Println("Something went wrong getting user credentials.")
-			log.Fatalln(err.Error())
-		}
+	token, err := kc.sourceToken.Token()
+	if err != nil {
+		log.Println("Failed to get the token. Maybe refresh failed.")
+		log.Println("Error is : " + err.Error())
 
-		sourceToken := internalOauthConfig.TokenSource(context.Background(), token)
-		kc.sourceToken = oauth2.ReuseTokenSource(nil, sourceToken)
+		errorMessage := NewTestTokenErrorResponse(err.Error())
+		if errorMessage.Error == "invalid_grant" && errorMessage.ErrorDescription != "Refresh token expired" {
+			login = true
+		} else {
+			log.Fatalln("Getting the token has failed.")
+		}
+	}
+	sourceToken := internalOauthConfig.TokenSource(context.Background(), token)
+	kc.sourceToken = oauth2.ReuseTokenSource(nil, sourceToken)
+	return login
+}
+
+func loadTokenFromCredentials(kc *KcClient) {
+	// This is first time and if the token has failed on "refresh_token"
+	token, err := internalOauthConfig.PasswordCredentialsToken(context.Background(), kc.user, kc.password)
+	if err != nil {
+		log.Println("Something went wrong getting user credentials.")
+		log.Fatalln(err.Error())
+	}
+
+	sourceToken := internalOauthConfig.TokenSource(context.Background(), token)
+	kc.sourceToken = oauth2.ReuseTokenSource(nil, sourceToken)
+}
+
+func (kc *KcClient) GetToken() *oauth2.Token {
+	login := loadTokenFromSourceToken(kc)
+
+	if login {
+		loadTokenFromCredentials(kc)
+	}
+
+	token, err := kc.sourceToken.Token()
+	if err != nil {
+		log.Println("Failed to get the token. This should never happen ;)")
+		log.Println("Error is : " + err.Error())
 	}
 	return token
 }
