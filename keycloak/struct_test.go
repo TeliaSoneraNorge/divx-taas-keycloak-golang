@@ -166,3 +166,17 @@ func TestRoleMappings(t *testing.T) {
 	}
 	utils.PrettyPrintJSON(res, " ")
 }
+
+func TestTokenErrorResponse(t *testing.T) {
+	str := `{
+	"error":"invalid_grant",
+	"error_description":"Refresh token expired"
+}`
+	errorMessage := keycloak.NewTestTokenErrorResponse(str)
+	if errorMessage.Error != "invalid_grant" {
+		t.Fail()
+	}
+	if errorMessage.ErrorDescription != "Refresh token expired" {
+		t.Fail()
+	}
+}

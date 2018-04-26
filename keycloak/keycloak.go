@@ -13,6 +13,11 @@ type KeycloakOidcClient struct {
 	Server         string
 }
 
+type TokenErrorResponse struct {
+	Error            string `json:"error"`
+	ErrorDescription string `json:"error_description"`
+}
+
 type ErrorMessageResponseFromKeycloak struct {
 	ErrorMessage string `json:"errorMessage"`
 }
@@ -55,6 +60,8 @@ type KcClient struct {
 	server         string
 	sourceToken    oauth2.TokenSource
 	UserWithAccess string
+	user           string
+	password       string
 }
 
 type RoleMappings struct {

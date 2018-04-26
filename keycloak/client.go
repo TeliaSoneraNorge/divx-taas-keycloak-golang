@@ -12,20 +12,18 @@ import (
 	"golang.org/x/oauth2"
 )
 
+var internalOauthConfig *oauth2.Config
+
 func NewKcClient(oauthConfig *oauth2.Config, server string, user string, password string) *KcClient {
+	internalOauthConfig = oauthConfig
+
 	client := &KcClient{
-		oauthConfig: oauthConfig,
+		oauthConfig: internalOauthConfig,
 		server:      server,
+		user:        user,
+		password:    password,
 	}
-
-	token, err := oauthConfig.PasswordCredentialsToken(context.Background(), user, password)
-	if err != nil {
-		log.Println("Something went wrong creating a new client.")
-		log.Fatalln(err.Error())
-	}
-
-	sourceToken := oauthConfig.TokenSource(context.Background(), token)
-	client.sourceToken = oauth2.ReuseTokenSource(nil, sourceToken)
+	client.GetToken()
 	return client
 }
 
@@ -365,10 +363,40 @@ func (kc *KcClient) GetHttpClient() *http.Client {
 }
 
 func (kc *KcClient) GetToken() *oauth2.Token {
-	token, err := kc.sourceToken.Token()
-	if err != nil {
-		log.Println("Failed to get the token. Maybe refresh failed.")
-		log.Fatalln("Sad times " + err.Error())
+	login := true
+	var token *oauth2.Token
+	var err error
+	// This is the normal approach
+	if kc.sourceToken != nil {
+		login = false
+		token, err = kc.sourceToken.Token()
+		if err != nil {
+			log.Println("Failed to get the token. Maybe refresh failed.")
+			log.Println("Error is : " + err.Error())
+
+			errorMessage := NewTestTokenErrorResponse(err.Error())
+			if errorMessage.Error == "invalid_grant" && errorMessage.ErrorDescription != "Refresh token expired" {
+				login = true
+			} else {
+				log.Fatalln("Getting the token has failed.")
+			}
+
+		} else {
+			sourceToken := internalOauthConfig.TokenSource(context.Background(), token)
+			kc.sourceToken = oauth2.ReuseTokenSource(nil, sourceToken)
+		}
+	}
+
+	if login {
+		// This is first time and if the token has failed on "refresh_token"
+		token, err = internalOauthConfig.PasswordCredentialsToken(context.Background(), kc.user, kc.password)
+		if err != nil {
+			log.Println("Something went wrong getting user credentials.")
+			log.Fatalln(err.Error())
+		}
+
+		sourceToken := internalOauthConfig.TokenSource(context.Background(), token)
+		kc.sourceToken = oauth2.ReuseTokenSource(nil, sourceToken)
 	}
 	return token
 }
