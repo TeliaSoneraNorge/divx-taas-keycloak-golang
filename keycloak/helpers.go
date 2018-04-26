@@ -1,5 +1,7 @@
 package keycloak
 
+import "encoding/json"
+
 // Filter client roles by role name
 func FilterClientIDByRoleName(roleMappings RoleMappings, filterOn string) []string {
 	response := []string{}
@@ -12,4 +14,10 @@ func FilterClientIDByRoleName(roleMappings RoleMappings, filterOn string) []stri
 		}
 	}
 	return response
+}
+
+func NewTestTokenErrorResponse(response string) TokenErrorResponse {
+	var errorMessage TokenErrorResponse
+	json.Unmarshal([]byte(response), &errorMessage)
+	return errorMessage
 }
