@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/TeliaSoneraNorge/divx-taas-keycloak-golang/utils"
 	"golang.org/x/oauth2"
 )
 
@@ -375,8 +376,8 @@ func loadTokenFromSourceToken(kc *KcClient) bool {
 		log.Println("Failed to get the token. Maybe refresh failed.")
 		log.Println("Error is : " + err.Error())
 
-		errorMessage := NewTestTokenErrorResponse(err.Error())
-		if errorMessage.Error == "invalid_grant" && errorMessage.ErrorDescription != "Refresh token expired" {
+		refreshTokenExpired := utils.HasRefreshTokenExpired(err.Error())
+		if refreshTokenExpired {
 			login = true
 		} else {
 			log.Fatalln("Getting the token has failed.")

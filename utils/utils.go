@@ -29,3 +29,7 @@ func DumpResponseBody(resp *http.Response) {
 	bodyString := string(bodyBytes)
 	fmt.Println(bodyString)
 }
+
+func HasRefreshTokenExpired(message string) bool {
+	return strings.Contains(message, `{"error":"invalid_grant","error_description":"Refresh token expired"}`)
+}
