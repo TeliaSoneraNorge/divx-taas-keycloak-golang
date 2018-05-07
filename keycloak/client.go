@@ -129,7 +129,7 @@ func (kc *KcClient) GetClientByRoleName(taasRealm string, clientId string, roleN
 	return role, err
 }
 
-func (kc *KcClient) LinkUserToClientRole(realm string, user PairWise, clientID string, role *RoleRepresentation) bool {
+func (kc *KcClient) LinkUserToClientRole(userMakingTheLink string, realm string, user PairWise, clientID string, role *RoleRepresentation) bool {
 	userID := user.InternalSubject
 	url := fmt.Sprintf("%s/admin/realms/%s/users/%s/role-mappings/clients/%s",
 		kc.server,
@@ -153,8 +153,8 @@ func (kc *KcClient) LinkUserToClientRole(realm string, user PairWise, clientID s
 	resp, err := httpClient.Do(req)
 
 	if err != nil {
-		log.Printf("Failed to link User %s, linked user %s with client %s, granting role %s",
-			kc.UserWithAccess,
+		log.Printf("Failed: User %s, linked user %s with client %s, granting role %s",
+			userMakingTheLink,
 			userID,
 			clientID,
 			role.Name,
@@ -166,7 +166,7 @@ func (kc *KcClient) LinkUserToClientRole(realm string, user PairWise, clientID s
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusNoContent {
 		log.Printf("User %s, linked user %s with client %s, granting role %s",
-			kc.UserWithAccess,
+			userMakingTheLink,
 			userID,
 			clientID,
 			role.Name,
@@ -174,12 +174,21 @@ func (kc *KcClient) LinkUserToClientRole(realm string, user PairWise, clientID s
 		return true
 	}
 
-	log.Printf("Failed to link User %s, linked user %s with client %s, granting role %s",
-		kc.UserWithAccess,
+	if resp.StatusCode == http.StatusNotFound {
+		log.Printf("Failed: User %s, the linking user %s does not exist.",
+			userMakingTheLink,
+			userID,
+		)
+		return false
+	}
+
+	log.Printf("Failed: User %s, linked user %s with client %s, granting role %s",
+		userMakingTheLink,
 		userID,
 		clientID,
 		role.Name,
 	)
+	log.Println(resp.StatusCode)
 	return false
 }
 

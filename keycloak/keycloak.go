@@ -56,12 +56,11 @@ type AccessTokenClaimsWithRoles struct {
 }
 
 type KcClient struct {
-	oauthConfig    *oauth2.Config
-	server         string
-	sourceToken    oauth2.TokenSource
-	UserWithAccess string
-	user           string
-	password       string
+	oauthConfig *oauth2.Config
+	server      string
+	sourceToken oauth2.TokenSource
+	user        string
+	password    string
 }
 
 type RoleMappings struct {
