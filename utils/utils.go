@@ -19,8 +19,11 @@ func InArray(arr []string, str string) bool {
 
 // Extract the string after the Bearer
 func ExtractTokenFromBearerHeader(raw string) string {
-	accessToken := strings.SplitAfter(raw, "Bearer ")[1]
-	return accessToken
+	parts := strings.SplitAfter(raw, "Bearer ")
+	if len(parts) == 2 {
+		return parts[1]
+	}
+	return ""
 }
 
 func DumpResponseBody(resp *http.Response) {
