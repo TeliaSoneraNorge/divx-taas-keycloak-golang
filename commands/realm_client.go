@@ -19,7 +19,7 @@ var realmClientCmd = &cobra.Command{
 		clientId := args[1]
 		client := Initialise()
 
-		clientInformation, errorMessage := client.KeycloakClient.GetClientInformation(realm, clientId)
+		clientRepresentation, errorMessage := client.KeycloakClient.GetClientRepresentation(realm, clientId)
 		if errorMessage != nil {
 			fmt.Println(errorMessage)
 			return
@@ -27,7 +27,7 @@ var realmClientCmd = &cobra.Command{
 
 		fmt.Printf("ClientId %s has name %s and description %s\n",
 			clientId,
-			clientInformation.Name,
-			clientInformation.Description)
+			clientRepresentation.Name,
+			clientRepresentation.Description)
 	},
 }

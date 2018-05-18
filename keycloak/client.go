@@ -219,8 +219,8 @@ func (kc *KcClient) GetClientRoles(realm string, clientID string) ([]RoleReprese
 	return nil, err
 }
 
-func (kc *KcClient) GetClientInformation(realm string, clientID string) (ClientInformation, error) {
-	var clientInformation ClientInformation
+func (kc *KcClient) GetClientRepresentation(realm string, clientID string) (ClientRepresentation, error) {
+	var clientRepresentation ClientRepresentation
 	url := fmt.Sprintf("%s/admin/realms/%s/clients/%s",
 		kc.server,
 		realm,
@@ -235,14 +235,14 @@ func (kc *KcClient) GetClientInformation(realm string, clientID string) (ClientI
 		defer resp.Body.Close()
 
 		// Use json.Decode for reading streams of JSON data
-		if err := json.NewDecoder(resp.Body).Decode(&clientInformation); err != nil {
+		if err := json.NewDecoder(resp.Body).Decode(&clientRepresentation); err != nil {
 			log.Println(err)
 		}
-		return clientInformation, nil
+		return clientRepresentation, nil
 	}
 
-	err := errors.New("Failed to get client information for this clientID")
-	return clientInformation, err
+	err := errors.New("Failed to get client irepresentation for this clientID")
+	return clientRepresentation, err
 }
 
 func (kc *KcClient) DeleteClientRoles(realm string, clientID string, roleName string) (bool, ErrorMessageResponseFromKeycloak) {
