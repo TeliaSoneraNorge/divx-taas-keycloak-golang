@@ -57,8 +57,8 @@ func Initialise() *keycloak.KeycloakOidcClient {
 
 	provider, err := oidc.NewProvider(ctx, oidcProvider)
 	if err != nil {
-		log.Fatalln("Failed to get an oidc Provider")
-		log.Fatalln("Error %s", err)
+		log.Println("Failed to get an oidc Provider")
+		log.Fatalf("Error %s", err)
 	}
 	oidcConfig := &oidc.Config{
 		SkipClientIDCheck: true,
