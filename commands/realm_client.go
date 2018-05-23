@@ -1,8 +1,9 @@
 package commands
 
 import (
-	"github.com/spf13/cobra"
 	"fmt"
+
+	"github.com/spf13/cobra"
 )
 
 func init() {
@@ -26,7 +27,7 @@ var realmClientCmd = &cobra.Command{
 		}
 
 		fmt.Printf("ClientId %s has name %s and description %s\n",
-			clientId,
+			clientRepresentation.Id,
 			clientRepresentation.Name,
 			clientRepresentation.Description)
 	},
