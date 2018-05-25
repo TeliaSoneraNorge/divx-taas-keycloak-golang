@@ -43,6 +43,12 @@ type RoleRepresentation struct {
 	Description        string `json:"description"`
 }
 
+type ClientRepresentation struct {
+	Id                 string `json:"id"`
+	Name               string `json:"name"`
+	Description        string `json:"description"`
+}
+
 type RealmAccessRoles struct {
 	Roles []string `json:"roles"`
 }
