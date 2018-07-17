@@ -365,6 +365,33 @@ func (kc *KcClient) GetUserRoleMappings(realm string, userID string) (RoleMappin
 	return roleMappings, err
 }
 
+func (kc *KcClient) GetUsersForRole(realm string, clientID string, roleName string) ([]UserPresentation, error) {
+	var users = []UserPresentation{}
+	url := fmt.Sprintf("%s/admin/realms/%s/clients/%s/roles/%s/users",
+		kc.server,
+		realm,
+		clientID,
+		roleName,
+	)
+
+	httpClient := kc.GetHttpClient()
+	req, _ := http.NewRequest("GET", url, nil)
+	resp, _ := httpClient.Do(req)
+
+	if resp.StatusCode == http.StatusOK {
+		defer resp.Body.Close()
+
+		// Use json.Decode for reading streams of JSON data
+		if err := json.NewDecoder(resp.Body).Decode(&users); err != nil {
+			log.Println(err)
+		}
+		return users, nil
+	}
+
+	err := errors.New("Failed to get users for this rolename.")
+	return users, err
+}
+
 func (kc *KcClient) GetClientSecret(realm string, userID string, clientID string) (*ClientSecret, error) {
 	// @todo we should log this request
 	url := fmt.Sprintf("%s/admin/realms/%s/clients/%s/client-secret",
