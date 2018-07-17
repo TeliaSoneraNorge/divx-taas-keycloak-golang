@@ -49,7 +49,7 @@ type ClientRepresentation struct {
 	Description        string `json:"description"`
 }
 
-type UserPresentation struct {
+type UserRepresentation struct {
 	Id                 string `json:"id"`
 	Name               string `json:"username"`
 }

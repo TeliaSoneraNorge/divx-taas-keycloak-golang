@@ -365,8 +365,8 @@ func (kc *KcClient) GetUserRoleMappings(realm string, userID string) (RoleMappin
 	return roleMappings, err
 }
 
-func (kc *KcClient) GetUsersForRole(realm string, clientID string, roleName string) ([]UserPresentation, error) {
-	var users = []UserPresentation{}
+func (kc *KcClient) GetUsersForRole(realm string, clientID string, roleName string) ([]UserRepresentation, error) {
+	var users = []UserRepresentation{}
 	url := fmt.Sprintf("%s/admin/realms/%s/clients/%s/roles/%s/users",
 		kc.server,
 		realm,

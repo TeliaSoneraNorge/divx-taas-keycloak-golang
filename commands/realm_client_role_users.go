@@ -27,7 +27,7 @@ var realmClientRoleUsersCmd = &cobra.Command{
 			return
 		}
 		for _, user := range userRepresentation {
-			fmt.Printf("%s\n", user.Id)
+			fmt.Printf("UserId %s with name %s:\n", user.Id, user.Name);
 		}
 	},
 }
