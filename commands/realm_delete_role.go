@@ -12,7 +12,7 @@ func init() {
 }
 
 var realmRoleDeleteCmd = &cobra.Command{
-	Use:   "delete realm name",
+	Use:   "delete role name from realm",
 	Short: "Work with the realm.",
 	Long:  `Work with the realm.`,
 	Args:  cobra.ExactArgs(2),

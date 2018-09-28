@@ -5,10 +5,10 @@ import (
 )
 
 func init() {
-	realmCmd.AddCommand(realmClientCmd)
+	realmCmd.AddCommand(realmUserCmd)
 }
 
-var realmClientCmd = &cobra.Command{
+var realmUserCmd = &cobra.Command{
 	Use:   "client [realm clientId]",
 	Short: "Operations for a client",
 	Long:  "Operations for a client",
