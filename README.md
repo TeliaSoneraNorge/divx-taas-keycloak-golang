@@ -5,7 +5,7 @@ Used to interact with Telia TAAS Keycloak.
 
 ```
 $ go run cmd/cli/main.go -h
-Trust as a service, api.
+Trust as a service, api. 
 
 Usage:
   realm [command]
@@ -39,7 +39,7 @@ Flags:
       --keycloak-server string     Server to talk to. (default "https://staging.login.telia.io")
       --keycloak-user string       user who will access keycloak admin-cli (default "change")
 
-  The flags may be enterd in a config.json file in order not to clutter the interface:
+  The flags may be entered in a config.json file in order not to clutter the interface:
   {
       "keycloak-user" : "jupiter",
       "keycloak-password" : "god",

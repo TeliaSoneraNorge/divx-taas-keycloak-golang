@@ -441,7 +441,6 @@ func (kc *KcClient) GetUsersForRole(realm string, clientID string, roleName stri
 	req, _ := http.NewRequest("GET", url, nil)
 	resp, _ := httpClient.Do(req)
 
-	print
 	if resp.StatusCode == http.StatusOK {
 		defer resp.Body.Close()
 
