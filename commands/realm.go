@@ -12,4 +12,5 @@ var realmCmd = &cobra.Command{
 	Use:   "realm",
 	Short: "Work with the realm.",
 	Long:  `Work with the realm.`,
+	
 }

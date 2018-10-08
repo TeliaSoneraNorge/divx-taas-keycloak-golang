@@ -192,6 +192,69 @@ func (kc *KcClient) LinkUserToClientRole(userMakingTheLink string, realm string,
 	return false
 }
 
+func (kc *KcClient) UnlinkUserFromClientRole(userDeletingTheLink string, realm string, user PairWise, clientID string, role *RoleRepresentation) bool {
+	userID := user.InternalSubject
+	url := fmt.Sprintf("%s/admin/realms/%s/users/%s/role-mappings/clients/%s",
+		kc.server,
+		realm,
+		userID,
+		clientID,
+	)
+
+	httpClient := kc.GetHttpClient()
+	roles := []*RoleRepresentation{role}
+
+	b, err := json.Marshal(roles)
+	if err != nil {
+		log.Println("Failed to marshall roles :(")
+		return false
+	}
+
+	req, _ := http.NewRequest("DELETE", url, bytes.NewBuffer(b))
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := httpClient.Do(req)
+
+	if err != nil {
+		log.Printf("Failed: User %s, unlinked user %s from client %s, removing role %s",
+			userDeletingTheLink,
+			userID,
+			clientID,
+			role.Name,
+		)
+		log.Println(err)
+		return false
+	}
+
+	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusNoContent {
+		log.Printf("User %s, unlinked user %s from client %s, removing role %s",
+			userDeletingTheLink,
+			userID,
+			clientID,
+			role.Name,
+		)
+		return true
+	}
+
+	if resp.StatusCode == http.StatusNotFound {
+		log.Printf("Failed: User %s, the unlinked user %s does not exist.",
+			userDeletingTheLink,
+			userID,
+		)
+		return false
+	}
+
+	log.Printf("Failed: User %s, unlinked user %s from client %s, removing role %s",
+		userDeletingTheLink,
+		userID,
+		clientID,
+		role.Name,
+	)
+	log.Println(resp.StatusCode)
+	return false
+}
+
 func (kc *KcClient) GetClientRoles(realm string, clientID string) ([]RoleRepresentation, error) {
 	url := fmt.Sprintf("%s/admin/realms/%s/clients/%s/roles",
 		kc.server,
