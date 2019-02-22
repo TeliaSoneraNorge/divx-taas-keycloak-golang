@@ -38,8 +38,17 @@ func (kc *KcClient) GetUserRolesForClient(realm string, user PairWise, clientID 
 	)
 
 	httpClient := kc.GetHttpClient()
-	req, _ := http.NewRequest("GET", url, nil)
-	resp, _ := httpClient.Do(req)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Println("GetUserRolesForClient - http.NewRequest", err)
+		return nil, err
+	}
+
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		log.Println("GetUserRolesForClient - httpClient.Do", err)
+		return nil, err
+	}
 
 	if resp.StatusCode == 200 {
 		defer resp.Body.Close()
@@ -53,7 +62,7 @@ func (kc *KcClient) GetUserRolesForClient(realm string, user PairWise, clientID 
 		return roles, nil
 	}
 
-	err := errors.New("Failed to get roles for this userID.")
+	err = errors.New("Failed to get roles for this userID.")
 	return nil, err
 }
 
@@ -65,10 +74,16 @@ func (kc *KcClient) GetMasterRealmUserRoles(userId string) ([]RoleRepresentation
 	)
 
 	httpClient := kc.GetHttpClient()
-	req, _ := http.NewRequest("GET", url, nil)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Println("GetMasterRealmUserRoles - http.NewRequest:", err)
+		return nil, err
+	}
+
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		log.Println(err)
+		log.Println("GetMasterRealmUserRoles - httpClient.Do:", err)
 		return nil, err
 	}
 
@@ -90,7 +105,11 @@ func (kc *KcClient) GetMasterRealmUserRoles(userId string) ([]RoleRepresentation
 
 func (kc *KcClient) HasRoleInMasterRealm(name string, userId string) bool {
 	var roles []RoleRepresentation
-	roles, _ = kc.GetMasterRealmUserRoles(userId)
+	roles, err := kc.GetMasterRealmUserRoles(userId)
+
+	if err != nil {
+		log.Println("HasRoleInMasterRealm - GetMasterRealmUserRoles:", err)
+	}
 
 	for _, role := range roles {
 		if role.Name == name {
@@ -111,8 +130,18 @@ func (kc *KcClient) GetClientByRoleName(taasRealm string, clientId string, roleN
 	)
 
 	httpClient := kc.GetHttpClient()
-	req, _ := http.NewRequest("GET", url, nil)
-	resp, _ := httpClient.Do(req)
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Println("GetClientByRoleName - httpClient.NewRequest:", err)
+		return role, err
+	}
+
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		log.Println("GetClientByRoleName - httpClient.Do:", err)
+		return role, err
+	}
 
 	if resp.StatusCode == http.StatusOK {
 		defer resp.Body.Close()
@@ -125,7 +154,7 @@ func (kc *KcClient) GetClientByRoleName(taasRealm string, clientId string, roleN
 		return role, nil
 	}
 
-	err := errors.New("Role name not found for this client.")
+	err = errors.New("Role name not found for this client.")
 	return role, err
 }
 
@@ -147,9 +176,13 @@ func (kc *KcClient) LinkUserToClientRole(userMakingTheLink string, realm string,
 		return false
 	}
 
-	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(b))
-	req.Header.Set("Content-Type", "application/json")
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(b))
+	if err != nil {
+		log.Println("LinkUserToClientRole - httpClient.NewRequest:", err)
+		return false
+	}
 
+	req.Header.Set("Content-Type", "application/json")
 	resp, err := httpClient.Do(req)
 
 	if err != nil {
@@ -263,8 +296,17 @@ func (kc *KcClient) GetClientRoles(realm string, clientID string) ([]RoleReprese
 	)
 
 	httpClient := kc.GetHttpClient()
-	req, _ := http.NewRequest("GET", url, nil)
-	resp, _ := httpClient.Do(req)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Println("GetClientRoles - httpClient.NewRequest:", err)
+		return []RoleRepresentation{}, err
+	}
+
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		log.Println("GetClientRoles - httpClient.Do:", err)
+		return []RoleRepresentation{}, err
+	}
 
 	if resp.StatusCode == http.StatusOK {
 		defer resp.Body.Close()
@@ -278,7 +320,7 @@ func (kc *KcClient) GetClientRoles(realm string, clientID string) ([]RoleReprese
 		return roles, nil
 	}
 
-	err := errors.New("Failed to get roles for this clientID.")
+	err = errors.New("Failed to get roles for this clientID.")
 	return nil, err
 }
 
@@ -291,8 +333,17 @@ func (kc *KcClient) GetClientRepresentation(realm string, clientID string) (Clie
 	)
 
 	httpClient := kc.GetHttpClient()
-	req, _ := http.NewRequest("GET", url, nil)
-	resp, _ := httpClient.Do(req)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Println("GetClientRepresentation - httpClient.NewRequest:", err)
+		return ClientRepresentation{}, err
+	}
+
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		log.Println("GetClientRepresentation - httpClient.Do:", err)
+		return ClientRepresentation{}, err
+	}
 
 	if resp.StatusCode == http.StatusOK {
 		defer resp.Body.Close()
@@ -304,7 +355,7 @@ func (kc *KcClient) GetClientRepresentation(realm string, clientID string) (Clie
 		return clientRepresentation, nil
 	}
 
-	err := errors.New("Failed to get client irepresentation for this clientID")
+	err = errors.New("Failed to get client irepresentation for this clientID")
 	return clientRepresentation, err
 }
 
@@ -320,9 +371,16 @@ func (kc *KcClient) DeleteClientRoles(realm string, clientID string, roleName st
 	)
 
 	httpClient := kc.GetHttpClient()
-	req, _ := http.NewRequest("DELETE", url, nil)
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		log.Println("DeleteClientRoles - httpClient.NewRequest:", err)
+	}
+
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := httpClient.Do(req)
+	if err != nil {
+		log.Println("DeleteClientRoles - httpClient.Do:", err)
+	}
 
 	if err != nil {
 		errorMessage.ErrorMessage = fmt.Sprintf("Failed to DELETE role with name %s to client %s",
